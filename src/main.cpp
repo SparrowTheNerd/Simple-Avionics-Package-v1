@@ -13,7 +13,7 @@ void setup() {
   pinMode(22,OUTPUT); digitalWrite(22,HIGH);
 
   Serial.begin(115200);
-  while (!Serial) delay(1); // Wait for Serial Console (comment out line if no computer)
+  // while (!Serial) delay(1); // Wait for Serial Console (comment out line if no computer)
 
   digitalWrite(RFM95_RST, HIGH);
   delay(10);
@@ -28,13 +28,13 @@ void setup() {
   // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
 
   // You can change the modulation parameters with eg
-  rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
+  rf95.setModemConfig(RH_RF95::Bw125Cr45Sf128);
 }
 
 void loop() {
  if (rf95.available()) {
     // Should be a message for us now
-    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+    uint8_t buf[sizeof(float)*3];
     uint8_t len = sizeof(buf);
     if (rf95.recv(buf, &len)) {
       if (!len) return;
@@ -42,17 +42,20 @@ void loop() {
       Serial.print("Received [");
       Serial.print(len);
       Serial.print("]: ");
-      Serial.println((char*)buf);
+
+      float msg[] = {0.f,0.f,0.f};
+      memcpy(&msg,buf,sizeof(float)*3);
+
+      Serial.print(msg[0],5); Serial.print("  "); Serial.print(msg[1],5); Serial.print("  "); Serial.println(msg[2],5);
       Serial.print("RSSI: ");
       Serial.println(rf95.lastRssi(), DEC);
 
-      if (strstr((char *)buf, "Hello World")) {
-        // Send a reply!
-        uint8_t data[] = "And hello back to you";
-        rf95.send(data, sizeof(data));
-        rf95.waitPacketSent();
-        Serial.println("Sent a reply");
-      }
+      // // Send a reply!
+      // uint8_t data[] = "And hello back to you";
+      // rf95.send(data, sizeof(data));
+      // rf95.waitPacketSent();
+      // Serial.println("Sent a reply");
+
     } else {
       Serial.println("Receive failed");
     }
