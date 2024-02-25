@@ -8,6 +8,10 @@
 
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
+struct packet {
+  float float1,float2,float3;
+} dataPacket;
+
 void setup() {
   pinMode(23,OUTPUT); digitalWrite(23,HIGH);
   pinMode(22,OUTPUT); digitalWrite(22,HIGH);
@@ -34,7 +38,7 @@ void setup() {
 void loop() {
  if (rf95.available()) {
     // Should be a message for us now
-    uint8_t buf[sizeof(float)*3];
+    uint8_t buf[sizeof(dataPacket)];
     uint8_t len = sizeof(buf);
     if (rf95.recv(buf, &len)) {
       if (!len) return;
@@ -43,10 +47,9 @@ void loop() {
       Serial.print(len);
       Serial.print("]: ");
 
-      float msg[] = {0.f,0.f,0.f};
-      memcpy(&msg,buf,sizeof(float)*3);
+      memcpy(&dataPacket,buf,sizeof(float)*3);
 
-      Serial.print(msg[0],5); Serial.print("  "); Serial.print(msg[1],5); Serial.print("  "); Serial.println(msg[2],5);
+      Serial.print(dataPacket.float1,5); Serial.print("  "); Serial.print(dataPacket.float2,5); Serial.print("  "); Serial.println(dataPacket.float3,5);
       Serial.print("RSSI: ");
       Serial.println(rf95.lastRssi(), DEC);
 
