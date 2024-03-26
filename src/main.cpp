@@ -9,7 +9,7 @@
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
 struct packet {
-  float float1,float2,float3;
+  float w,i,j,k,vX,vY,vZ,X,Y,Z;
 } dataPacket;
 
 void setup() {
@@ -43,21 +43,11 @@ void loop() {
     if (rf95.recv(buf, &len)) {
       if (!len) return;
       buf[len] = 0;
-      Serial.print("Received [");
-      Serial.print(len);
-      Serial.print("]: ");
+      memcpy(&dataPacket,buf,sizeof(dataPacket));
 
-      memcpy(&dataPacket,buf,sizeof(float)*3);
-
-      Serial.print(dataPacket.float1,5); Serial.print("  "); Serial.print(dataPacket.float2,5); Serial.print("  "); Serial.println(dataPacket.float3,5);
-      Serial.print("RSSI: ");
-      Serial.println(rf95.lastRssi(), DEC);
-
-      // // Send a reply!
-      // uint8_t data[] = "And hello back to you";
-      // rf95.send(data, sizeof(data));
-      // rf95.waitPacketSent();
-      // Serial.println("Sent a reply");
+      Serial.print(dataPacket.w,5); Serial.print(" \t"); Serial.print(dataPacket.i,5); Serial.print(" \t"); Serial.print(dataPacket.j,5); Serial.print(" \t"); Serial.println(dataPacket.k,5);
+      // Serial.print("RSSI: ");
+      // Serial.println(rf95.lastRssi(), DEC);
 
     } else {
       Serial.println("Receive failed");
